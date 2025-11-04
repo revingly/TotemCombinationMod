@@ -85,7 +85,7 @@ namespace TotemCombination
                     Debug.Log($"[TotemCombination] Item 1: {__instance.Content.DisplayName}, Item 2: {item.DisplayName}");
                     if (!TryGetUpgradeTypeId(item, out int upgradeTypeId))
                     {
-                        Debug.LogWarning($"[AllInOne] No upgrade mapping found for totem TypeID {item.TypeID}. Aborting combination.");
+                        Debug.LogWarning($"[TotemCombination] No upgrade mapping found for totem TypeID {item.TypeID}. Aborting combination.");
                         NotificationText.Push("Totem cannot be upgraded further.");
                     }
                     else
@@ -160,7 +160,7 @@ namespace TotemCombination
                     }
 
                     ItemUIUtilities.NotifyPutItem(upgradedTotem, false);
-                    NotificationText.Push($"[TotemCombination] Upgraded Totem -> {upgradedTotem.DisplayName}");
+                    NotificationText.Push($"Upgraded Totem -> {upgradedTotem.DisplayName}");
                     Debug.Log($"[TotemCombination] Totem upgraded to {upgradedTotem.DisplayName} (TypeID: {upgradeTypeId}).");
                 }
                 catch (Exception ex)
