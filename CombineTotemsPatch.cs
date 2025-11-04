@@ -81,11 +81,11 @@ namespace TotemCombination
                 }
                 if (__instance.Content.TypeID == item.TypeID && isTotem(__instance, item))
                 {
-                    Debug.Log($"Both items are totems and same type and same level. Combining together");
-                    Debug.Log($"Item 1: {__instance.Content.DisplayName}, Item 2: {item.DisplayName}");
+                    Debug.Log($"[TotemCombination] Both items are totems and same type and same level. Combining together");
+                    Debug.Log($"[TotemCombination] Item 1: {__instance.Content.DisplayName}, Item 2: {item.DisplayName}");
                     if (!TryGetUpgradeTypeId(item, out int upgradeTypeId))
                     {
-                        Debug.LogWarning($"[AllInOne] No upgrade mapping found for totem TypeID {item.TypeID}. Aborting fuse.");
+                        Debug.LogWarning($"[AllInOne] No upgrade mapping found for totem TypeID {item.TypeID}. Aborting combination.");
                         NotificationText.Push("Totem cannot be upgraded further.");
                     }
                     else
@@ -118,7 +118,7 @@ namespace TotemCombination
             Item baseTotem = entry.Content;
             if (baseTotem == null)
             {
-                Debug.LogWarning("[TotemCombination] Target slot emptied before fusion started.");
+                Debug.LogWarning("[TotemCombination] Target slot emptied before combination started.");
                 return;
             }
 
@@ -134,7 +134,7 @@ namespace TotemCombination
                         Debug.LogError($"[TotemCombination] Failed to instantiate upgraded totem for TypeID {upgradeTypeId}.");
                         return;
                     }
-                    Debug.Log($"Created upgraded totem with TypeID: {upgradedTotem.TypeID} - instance ID: {upgradedTotem.GetInstanceID()}");
+                    Debug.Log($"[TotemCombination] Created upgraded totem with TypeID: {upgradedTotem.TypeID} - instance ID: {upgradedTotem.GetInstanceID()}");
 
                     // Remove the consumed totems from the world/inventory.
                     if (baseTotem != null)
@@ -152,7 +152,6 @@ namespace TotemCombination
                     try
                     {
                         targetInventory.AddItem(upgradedTotem);
-                        //targetInventory.AddAt(upgradedTotem, slotIndex);
                     }
                     catch (Exception addEx)
                     {
@@ -161,12 +160,12 @@ namespace TotemCombination
                     }
 
                     ItemUIUtilities.NotifyPutItem(upgradedTotem, false);
-                    NotificationText.Push($"Upgraded Totem -> {upgradedTotem.DisplayName}");
+                    NotificationText.Push($"[TotemCombination] Upgraded Totem -> {upgradedTotem.DisplayName}");
                     Debug.Log($"[TotemCombination] Totem upgraded to {upgradedTotem.DisplayName} (TypeID: {upgradeTypeId}).");
                 }
                 catch (Exception ex)
                 {
-                    Debug.LogError($"[TotemCombination] Exception during totem fusion: {ex}");
+                    Debug.LogError($"[TotemCombination] Exception during totem combination: {ex}");
                 }
             });
         }
