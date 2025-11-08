@@ -83,7 +83,7 @@ namespace TotemCombination
                     if (__instance.Index == item.InInventory.GetIndex(item))
                     {
                         Debug.Log("[TotemCombination] Dropped item is the same as the target slot item. No action taken.");
-                        NotificationText.Push("Cannot combine the same item.");
+                        NotificationText.Push(LocalizationHelper.Get(LocalizationHelper.SameTotemCannotCombine));
                         return false;
                     }
 
@@ -92,7 +92,7 @@ namespace TotemCombination
                     if (!TryGetUpgradeTypeId(item, out int upgradeTypeId))
                     {
                         Debug.LogWarning($"[TotemCombination] No upgrade mapping found for totem TypeID {item.TypeID}. Aborting combination.");
-                        NotificationText.Push("Totem cannot be upgraded further.");
+                        NotificationText.Push(LocalizationHelper.Get(LocalizationHelper.TotemCannotUpgrade));
                     }
                     else
                     {
@@ -166,7 +166,7 @@ namespace TotemCombination
                     }
 
                     ItemUIUtilities.NotifyPutItem(upgradedTotem, false);
-                    NotificationText.Push($"Upgraded Totem -> {upgradedTotem.DisplayName}");
+                    NotificationText.Push(LocalizationHelper.Get(LocalizationHelper.TotemUpgraded, upgradedTotem.DisplayName));
                     Debug.Log($"[TotemCombination] Totem upgraded to {upgradedTotem.DisplayName} (TypeID: {upgradeTypeId}).");
                 }
                 catch (Exception ex)
