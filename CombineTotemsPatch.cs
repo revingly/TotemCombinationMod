@@ -80,6 +80,13 @@ namespace TotemCombination
 
                 if (__instance.Content.TypeID == item.TypeID && isTotem(__instance, item))
                 {
+                    if (__instance.Index == item.InInventory.GetIndex(item))
+                    {
+                        Debug.Log("[TotemCombination] Dropped item is the same as the target slot item. No action taken.");
+                        NotificationText.Push("Cannot combine the same item.");
+                        return false;
+                    }
+
                     Debug.Log($"[TotemCombination] Both items are totems and same type and same level. Combining together");
                     Debug.Log($"[TotemCombination] Item 1: {__instance.Content.DisplayName}, Item 2: {item.DisplayName}");
                     if (!TryGetUpgradeTypeId(item, out int upgradeTypeId))
