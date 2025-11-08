@@ -19,7 +19,6 @@ namespace TotemCombination
         public static bool Prefix(PointerEventData eventData, InventoryEntry __instance)
         {
             Debug.Log("[TotemCombination] InventoryEntry OnDrop Prefix called.");
-            Debug.Log($"[TotemCombination] InventoryEntry OnDrop eventData.used: {eventData.used}, __instance.Editable: {__instance.Editable}, eventData.button: {eventData.button}");
 
             if (eventData.used)
             {
@@ -221,8 +220,8 @@ namespace TotemCombination
             { 975, 432 }, // Efficiency I → Efficiency II
             { 432, 974 }, // Efficiency II → Efficiency III
 
-            { 978, 977 }, // Gun Control I → Gun Control II
-            { 977, 976 }, // Gun Control II → Gun Control III
+            { 978, 976 }, // Gun Control I → Gun Control II
+            { 976, 977 }, // Gun Control II → Gun Control III
 
             { 436, 435 }, // Ninja I → Ninja II
             { 435, 964 }, // Ninja II → Ninja III
