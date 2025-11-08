@@ -52,8 +52,6 @@ namespace TotemCombination
                 return false;
             }
 
-            var InventoryIndex = Traverse.Create(__instance).Field("index").GetValue<int>();
-
             if (Keyboard.current != null && Keyboard.current.ctrlKey.isPressed)
             {
                 if (__instance.Content != null)
@@ -62,7 +60,7 @@ namespace TotemCombination
                     return false;
                 }
                 Debug.Log("SPLIT");
-                SplitDialogue.SetupAndShow(item, __instance.Master.Target, InventoryIndex);
+                SplitDialogue.SetupAndShow(item, __instance.Master.Target, __instance.Index);
                 return false;
             }
             else
@@ -71,7 +69,7 @@ namespace TotemCombination
                 if (__instance.Content == null)
                 {
                     item.Detach();
-                    __instance.Master.Target.AddAt(item, InventoryIndex);
+                    __instance.Master.Target.AddAt(item, __instance.Index);
                     return false;
                 }
                 if (__instance.Content.TypeID == item.TypeID && __instance.Content.Stackable)
@@ -79,6 +77,7 @@ namespace TotemCombination
                     __instance.Content.Combine(item);
                     return false;
                 }
+
                 if (__instance.Content.TypeID == item.TypeID && isTotem(__instance, item))
                 {
                     Debug.Log($"[TotemCombination] Both items are totems and same type and same level. Combining together");
@@ -99,7 +98,7 @@ namespace TotemCombination
                 if (inInventory != null)
                 {
                     int num = inInventory.GetIndex(item);
-                    int num2 = InventoryIndex;
+                    int num2 = __instance.Index;
                     Item content = __instance.Content;
                     if (content != item)
                     {
