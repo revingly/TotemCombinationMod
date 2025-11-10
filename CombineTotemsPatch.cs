@@ -118,7 +118,7 @@ namespace TotemCombination
             }
         }
 
-        private static void StartTotemCombination(InventoryEntry entry, Item incomingItem, int upgradeTypeId)
+        private async static UniTaskVoid StartTotemCombination(InventoryEntry entry, Item incomingItem, int upgradeTypeId)
         {
             Item baseTotem = entry.Content;
             if (baseTotem == null)
