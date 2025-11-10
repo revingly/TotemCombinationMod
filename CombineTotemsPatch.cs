@@ -73,30 +73,20 @@ namespace TotemCombination
                 }
                 if (__instance.Content.TypeID == item.TypeID && __instance.Content.Stackable)
                 {
+                    if (isTotem(__instance, item))
+                    {
+                        Debug.Log("[TotemCombination] both are totems and have stacking! ignore stacking!");
+                        ProcessCombination(__instance, item);
+                        return false;
+                    }
+                    Debug.Log("[TotemCombination] Both items are stackable and same type. Combining stacks.");
                     __instance.Content.Combine(item);
                     return false;
                 }
 
                 if (__instance.Content.TypeID == item.TypeID && isTotem(__instance, item))
                 {
-                    if (__instance.Index == item.InInventory.GetIndex(item))
-                    {
-                        Debug.Log("[TotemCombination] Dropped item is the same as the target slot item. No action taken.");
-                        NotificationText.Push(LocalizationHelper.Get(LocalizationHelper.SameTotemCannotCombine));
-                        return false;
-                    }
-
-                    Debug.Log($"[TotemCombination] Both items are totems and same type and same level. Combining together");
-                    Debug.Log($"[TotemCombination] Item 1: {__instance.Content.DisplayName}, Item 2: {item.DisplayName}");
-                    if (!TryGetUpgradeTypeId(item, out int upgradeTypeId))
-                    {
-                        Debug.LogWarning($"[TotemCombination] No upgrade mapping found for totem TypeID {item.TypeID}. Aborting combination.");
-                        NotificationText.Push(LocalizationHelper.Get(LocalizationHelper.TotemCannotUpgrade));
-                    }
-                    else
-                    {
-                        StartTotemCombination(__instance, item, upgradeTypeId);
-                    }
+                    ProcessCombination(__instance, item);
                     return false;
                 }
                 Inventory inInventory = item.InInventory;
@@ -118,6 +108,28 @@ namespace TotemCombination
             }
         }
 
+        private static void ProcessCombination(InventoryEntry __instance, Item item)
+        {
+            if (__instance.Index == item.InInventory.GetIndex(item))
+            {
+                Debug.Log("[TotemCombination] Dropped item is the same as the target slot item. No action taken.");
+                NotificationText.Push(LocalizationHelper.Get(LocalizationHelper.SameTotemCannotCombine));
+                return;
+            }
+
+            Debug.Log($"[TotemCombination] Both items are totems and same type and same level. Combining together");
+            Debug.Log($"[TotemCombination] Item 1: {__instance.Content.DisplayName}, Item 2: {item.DisplayName}");
+            if (!TryGetUpgradeTypeId(item, out int upgradeTypeId))
+            {
+                Debug.LogWarning($"[TotemCombination] No upgrade mapping found for totem TypeID {item.TypeID}. Aborting combination.");
+                NotificationText.Push(LocalizationHelper.Get(LocalizationHelper.TotemCannotUpgrade));
+            }
+            else
+            {
+                StartTotemCombination(__instance, item, upgradeTypeId).Forget();
+            }
+        }
+
         private async static UniTaskVoid StartTotemCombination(InventoryEntry entry, Item incomingItem, int upgradeTypeId)
         {
             Item baseTotem = entry.Content;
@@ -129,50 +141,47 @@ namespace TotemCombination
 
             Inventory targetInventory = entry.Master.Target;
 
-            UniTask.Void(async () =>
+            try
             {
+                Item upgradedTotem = await ItemAssetsCollection.InstantiateAsync(upgradeTypeId);
+                if (upgradedTotem == null)
+                {
+                    Debug.LogError($"[TotemCombination] Failed to instantiate upgraded totem for TypeID {upgradeTypeId}.");
+                    return;
+                }
+                Debug.Log($"[TotemCombination] Created upgraded totem with TypeID: {upgradedTotem.TypeID} - instance ID: {upgradedTotem.GetInstanceID()}");
+
+                // Remove the consumed totems from the world/inventory.
+                if (baseTotem != null)
+                {
+                    baseTotem.Detach();
+                    baseTotem.DestroyTree();
+                }
+
+                if (incomingItem != null)
+                {
+                    incomingItem.Detach();
+                    incomingItem.DestroyTree();
+                }
+
                 try
                 {
-                    Item upgradedTotem = await ItemAssetsCollection.InstantiateAsync(upgradeTypeId);
-                    if (upgradedTotem == null)
-                    {
-                        Debug.LogError($"[TotemCombination] Failed to instantiate upgraded totem for TypeID {upgradeTypeId}.");
-                        return;
-                    }
-                    Debug.Log($"[TotemCombination] Created upgraded totem with TypeID: {upgradedTotem.TypeID} - instance ID: {upgradedTotem.GetInstanceID()}");
-
-                    // Remove the consumed totems from the world/inventory.
-                    if (baseTotem != null)
-                    {
-                        baseTotem.Detach();
-                        baseTotem.DestroyTree();
-                    }
-
-                    if (incomingItem != null)
-                    {
-                        incomingItem.Detach();
-                        incomingItem.DestroyTree();
-                    }
-
-                    try
-                    {
-                        targetInventory.AddItem(upgradedTotem);
-                    }
-                    catch (Exception addEx)
-                    {
-                        Debug.LogWarning($"[TotemCombination] insert failed: {addEx.Message}.");
-                        return;
-                    }
-
-                    ItemUIUtilities.NotifyPutItem(upgradedTotem, false);
-                    NotificationText.Push(LocalizationHelper.Get(LocalizationHelper.TotemUpgraded, upgradedTotem.DisplayName));
-                    Debug.Log($"[TotemCombination] Totem upgraded to {upgradedTotem.DisplayName} (TypeID: {upgradeTypeId}).");
+                    targetInventory.AddItem(upgradedTotem);
                 }
-                catch (Exception ex)
+                catch (Exception addEx)
                 {
-                    Debug.LogError($"[TotemCombination] Exception during totem combination: {ex}");
+                    Debug.LogWarning($"[TotemCombination] insert failed: {addEx.Message}.");
+                    return;
                 }
-            });
+
+                ItemUIUtilities.NotifyPutItem(upgradedTotem, false);
+                NotificationText.Push(LocalizationHelper.Get(LocalizationHelper.TotemUpgraded, upgradedTotem.DisplayName));
+                Debug.Log($"[TotemCombination] Totem upgraded to {upgradedTotem.DisplayName} (TypeID: {upgradeTypeId}).");
+            }
+            catch (Exception ex)
+            {
+                Debug.LogError($"[TotemCombination] Exception during totem combination: {ex}");
+            }
         }
 
         private static bool TryGetUpgradeTypeId(Item item, out int upgradeTypeId)
